@@ -2,6 +2,7 @@ package com.app.caresync.service;
 
 import java.util.Collections;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,6 +15,7 @@ import com.app.caresync.repository.UserRepository;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
+	@Autowired
 	private UserRepository userRepository;
 
 	@Override
