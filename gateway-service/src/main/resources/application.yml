@@ -18,3 +18,9 @@ spring:
           uri: https://provider-service-bgxb.onrender.com
           predicates:
             - Path=/api/providers/**, /api/admin/**
+
+        # 🚑 Patient Service (Records & History)
+        - id: patient-service
+          uri: ${PATIENT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/patients/**
