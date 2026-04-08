@@ -1,0 +1,13 @@
+# 📦 Professional Spring Boot .gitignore
+**/target/
+**/bin/
+*.class
+.idea/
+*.iml
+*.iws
+.project
+.classpath
+.settings/
+.vscode/
+.env
+*.properties.bak
