@@ -1,0 +1,20 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      routes:
+        # 🛡️ Auth Service (Identity & Login)
+        - id: auth-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/auth/**
+
+        # 🩺 Provider Service (Profiles & Vetting)
+        - id: provider-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/providers/**, /api/admin/**
