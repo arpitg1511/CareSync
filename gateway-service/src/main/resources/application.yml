@@ -7,14 +7,17 @@ spring:
   cloud:
     gateway:
       routes:
-        # 🛡️ Auth Service (Identity & Login)
         - id: auth-service
           uri: https://auth-service-lm7j.onrender.com
           predicates:
             - Path=/api/auth/**
-
-        # 🩺 Provider Service (Profiles & Vetting)
+            
         - id: provider-service
           uri: https://provider-service-bgxb.onrender.com
           predicates:
             - Path=/api/providers/**, /api/admin/**
+
+        - id: patient-service
+          uri: ${PATIENT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/patients/**
