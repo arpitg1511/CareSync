@@ -9,12 +9,12 @@ spring:
       routes:
         # 🛡️ Auth Service (Identity & Login)
         - id: auth-service
-          uri: http://localhost:8081
+          uri: https://auth-service-lm7j.onrender.com
           predicates:
             - Path=/api/auth/**
 
         # 🩺 Provider Service (Profiles & Vetting)
         - id: provider-service
-          uri: http://localhost:8082
+          uri: https://provider-service-bgxb.onrender.com
           predicates:
             - Path=/api/providers/**, /api/admin/**
