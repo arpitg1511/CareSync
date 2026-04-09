@@ -1,6 +1,7 @@
 package com.app.caresync.controller;
 
-import com.app.caresync.model.Patient;
+import com.app.caresync.dto.PatientRequest;
+import com.app.caresync.dto.PatientResponse;
 import com.app.caresync.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,23 +15,23 @@ public class PatientController {
     @Autowired
     private PatientService patientService;
 
-    // 🏆 Register / Update Patient Profile
+    // Register / Update Patient Profile
     @PostMapping("/profile")
-    public ResponseEntity<?> createProfile(@RequestBody Patient profile) {
+    public ResponseEntity<PatientResponse> createProfile(@RequestBody PatientRequest profile) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(patientService.createProfile(email, profile));
     }
 
-    // 🔍 Get My Profile
+    // Get My Profile
     @GetMapping("/me")
-    public ResponseEntity<?> getMyProfile() {
+    public ResponseEntity<PatientResponse> getMyProfile() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(patientService.getProfile(email));
     }
 
-    // 🩺 Update My Profile
+    // Update My Profile
     @PutMapping("/me")
-    public ResponseEntity<?> updateProfile(@RequestBody Patient profile) {
+    public ResponseEntity<PatientResponse> updateProfile(@RequestBody PatientRequest profile) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(patientService.updateProfile(email, profile));
     }
