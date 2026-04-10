@@ -22,3 +22,9 @@ spring:
           uri: ${PATIENT_SERVICE_URL:http://localhost:8083}
           predicates:
             - Path=/api/patients/**
+
+        # 📅 Appointment Service (Scheduling)
+        - id: appointment-service
+          uri: https://appointment-service-yets.onrender.com/
+          predicates:
+            - Path=/api/appointments/**
