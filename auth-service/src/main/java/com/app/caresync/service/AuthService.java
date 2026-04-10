@@ -8,6 +8,7 @@ import com.app.caresync.model.User;
 import com.app.caresync.model.UserRole;
 import com.app.caresync.repository.UserRepository;
 import com.app.caresync.security.JwtUtils;
+import com.app.caresync.security.UserDetailsImpl;
 
 import java.util.Optional;
 
@@ -42,8 +43,7 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateToken(authentication);
 
-        org.springframework.security.core.userdetails.User userDetails = 
-                (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         String role = userDetails.getAuthorities().iterator().next().getAuthority();
 
         return new JwtResponse(jwt, userDetails.getUsername(), role);
