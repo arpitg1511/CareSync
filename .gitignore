@@ -1,13 +1,12 @@
-# 📦 Professional Spring Boot .gitignore
-**/target/
-**/bin/
+target/
 *.class
 .idea/
 *.iml
-*.iws
 .project
-.classpath
 .settings/
-.vscode/
+.classpath
 .env
-*.properties.bak
+bin/
+*.jar
+*.war
+.factorypath
