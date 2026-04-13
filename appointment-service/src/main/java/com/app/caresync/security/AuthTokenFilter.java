@@ -28,10 +28,14 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
                 String role = jwtUtils.getRoleFromJwtToken(jwt);
                 
-                // For appointment service, we simply create an auth object with the username
+                // 🛡️ Null-Safe & Prefix-Smart Authority Extraction
+                String finalRole = (role != null) 
+                    ? (role.toUpperCase().startsWith("ROLE_") ? role.toUpperCase() : "ROLE_" + role.toUpperCase())
+                    : "ROLE_PATIENT"; // Default fallback
+                
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(username, null, 
-                                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase())));
+                                Collections.singletonList(new SimpleGrantedAuthority(finalRole)));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }

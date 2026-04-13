@@ -20,6 +20,10 @@ public class JwtUtils {
 	public String getUserNameFromJwtToken(String authToken) {
 		return Jwts.parserBuilder().setSigningKey(key()).build().parseClaimsJws(authToken).getBody().getSubject();
 	}
+
+	public String getRoleFromJwtToken(String authToken) {
+		return (String) Jwts.parserBuilder().setSigningKey(key()).build().parseClaimsJws(authToken).getBody().get("role");
+	}
 	
 	public boolean validateJwtToken(String authToken) {
 		try {

@@ -27,14 +27,32 @@ public class ProviderController {
     @PreAuthorize("hasRole('DOCTOR') or hasRole('ADMIN')")
     public ResponseEntity<?> saveProfile(Authentication authentication, @RequestBody ProviderRequest request) {
         ProviderResponse response = providerService.saveProvider(authentication.getName(), request);
-
         return ResponseEntity.ok(response);
+    }
+
+    // 📡 Internal endpoint for Appointment Service
+    @GetMapping("/internal/{id}/exists")
+    public boolean checkIfProviderExists(@PathVariable Long id) {
+        return providerService.existsById(id);
     }
 
     @GetMapping("/search")
     public ResponseEntity<?> searchProfile(@RequestParam String query) {
         List<ProviderResponse> providers = providerService.searchProviders(query);
-
         return ResponseEntity.ok(providers);
+    }
+
+    // 👑 Admin: Approve a doctor
+    @PutMapping("/admin/{id}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProviderResponse> approve(@PathVariable Long id) {
+        return ResponseEntity.ok(providerService.verifyProvider(id, com.app.caresync.model.ProviderStatus.APPROVED));
+    }
+
+    // 👑 Admin: List pending doctors
+    @GetMapping("/admin/pending")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<ProviderResponse>> getPending() {
+        return ResponseEntity.ok(providerService.getPendingProviders());
     }
 }

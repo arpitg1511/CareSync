@@ -1,8 +1,10 @@
 package com.app.caresync.security;
 
 import java.io.IOException;
+import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -24,9 +26,16 @@ public class AuthTokenFilter extends OncePerRequestFilter{
 			 String jwt = parseJwt(request);
 			 if(jwt != null && jwtUtils.validateJwtToken(jwt)) {
 				 String userName = jwtUtils.getUserNameFromJwtToken(jwt);
-				 
-				 UsernamePasswordAuthenticationToken authentication = 
-						 new UsernamePasswordAuthenticationToken(userName, null, null);
+				 String role = jwtUtils.getRoleFromJwtToken(jwt);
+                
+                // 🛡️ Null-Safe & Prefix-Smart Authority Extraction
+                String finalRole = (role != null) 
+                    ? (role.toUpperCase().startsWith("ROLE_") ? role.toUpperCase() : "ROLE_" + role.toUpperCase())
+                    : "ROLE_PATIENT";
+                
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(userName, null, 
+                                Collections.singletonList(new SimpleGrantedAuthority(finalRole)));
 				 
 				 SecurityContextHolder.getContext().setAuthentication(authentication);
 			 }

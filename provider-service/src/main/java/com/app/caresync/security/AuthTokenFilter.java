@@ -2,6 +2,8 @@ package com.app.caresync.security;
 
 import java.io.IOException;
 
+import java.util.Collections;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,11 +29,16 @@ public class AuthTokenFilter extends OncePerRequestFilter{
 			 String jwt = parseJwt(request);
 			 if(jwt != null && jwtUtils.validateJwtToken(jwt)) {
 				 String userName = jwtUtils.getUserNameFromJwtToken(jwt);
+				 String role = jwtUtils.getRoleFromJwtToken(jwt);
 				 
-				 // 🚀 Microservice logic: Trust the token! 
-				 // We don't call the DB here. We just create a principal from the email.
+				 // 🛡️ Null-Safe & Prefix-Smart Authority Extraction
+				 String finalRole = (role != null) 
+				     ? (role.toUpperCase().startsWith("ROLE_") ? role.toUpperCase() : "ROLE_" + role.toUpperCase())
+				     : "ROLE_PATIENT"; 
+				 
 				 UsernamePasswordAuthenticationToken authentication = 
-						 new UsernamePasswordAuthenticationToken(userName, null, null); // Roles can be added here if in JWT
+						 new UsernamePasswordAuthenticationToken(userName, null, 
+								 Collections.singletonList(new SimpleGrantedAuthority(finalRole)));
 				 
 				 SecurityContextHolder.getContext().setAuthentication(authentication);
 			 }

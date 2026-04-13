@@ -1,45 +1,54 @@
 package com.app.caresync.model;
 
-import java.time.LocalDateTime;
-
-import jakarta.annotation.Generated;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "appointment")
+@Table(name = "appointments")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Data
 public class Appointment {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long appointmentId;
-	
-	@Column(nullable = false, unique = true)
-	private Long patientId;
-	
-	@Column(nullable = false, unique = true)
-	private Long providerId;
-	
-	@Column(nullable = false)
-	private LocalDateTime appointmentDateTime;
-	
-	@Column(nullable = false)
-	@Enumerated(EnumType.STRING)
-	private AppointmentStatus status;
-	private String reason;
-	private String doctorNotes;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long appointmentId;
+
+    private Long patientId;
+
+    private Long providerId;
+
+    private Long slotId;
+
+    private String serviceType;
+
+    private LocalDate appointmentDate;
+
+    private LocalTime startTime;
+
+    private LocalTime endTime;
+
+    @Enumerated(EnumType.STRING)
+    private AppointmentStatus status; // Scheduled, Completed, Cancelled, No-Show
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
+
+    private String modeOfConsultation; // In-Person, Teleconsultation
+
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+    // Mapping for current code compatibility
+    private String reason;
+    private String doctorNotes;
+    private LocalDateTime appointmentDateTime;
 }

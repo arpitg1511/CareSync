@@ -28,7 +28,8 @@ public class JwtUtils {
 		
 		return Jwts.builder()
 				.setSubject((userPrincipal.getUsername()))
-				.claim("userId", ((UserDetailsImpl) userPrincipal).getId()) // 🚀 ID included for Microservices!
+				.claim("userId", ((UserDetailsImpl) userPrincipal).getId())
+				.claim("role", userPrincipal.getAuthorities().iterator().next().getAuthority()) // 🎭 ROLE INCLUDED!
 				.setIssuedAt(new Date())
 		.setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
 		.signWith(key(), SignatureAlgorithm.HS256)

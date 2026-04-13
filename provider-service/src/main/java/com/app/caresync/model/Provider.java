@@ -2,47 +2,51 @@ package com.app.caresync.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder; // Added!
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "providers")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder // Added!
+@Builder
 public class Provider {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long providerId; // Fixed naming
+    private Long providerId;
 
-    @Column(name = "user_id", nullable = false, unique = true)
     private Long userId;
 
-    @Column(nullable = false)
-    private String fullName; // Added for fast search! 🚀
-
-    @Column(nullable = false)
-    private String email;    // Added for decoupled lookups! 📧
-
-    @Column(nullable = false)
-    private String specialization; // Fixed typo
-
+    private String fullName;
+    private String email;
+    private String specialization;
+    private String qualification;
     private Integer experienceMonths;
-
-    @Column(nullable = false)
-    private String clinicName;
-
-    private String address;
-
-    @Column(nullable = false)
-    private String contact;
+    private Integer experienceYears;
     
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Builder.Default
-    private ProviderStatus status = ProviderStatus.PENDING;
-}
+    @Column(columnDefinition = "TEXT")
+    private String bio;
 
+    private String clinicName;
+    private String address;
+    private String clinicAddress;
+    private String contact;
+
+    private Double avgRating = 0.0;
+
+    @Builder.Default
+    private Boolean isVerified = false;
+
+    @Builder.Default
+    private Boolean isAvailable = true;
+
+    @Enumerated(EnumType.STRING)
+    private ProviderStatus status;
+
+    @Builder.Default
+    private LocalDate createdAt = LocalDate.now();
+}
