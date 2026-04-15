@@ -25,8 +25,7 @@ public class AuthController {
     // PDF: /auth/register
     @PostMapping("/signup")
     public ResponseEntity<?> register(@RequestBody SignupRequest req) {
-        try { return ResponseEntity.ok(authService.registerUser(req)); }
-        catch (RuntimeException e) { return ResponseEntity.badRequest().body(e.getMessage()); }
+        return ResponseEntity.ok(authService.registerUser(req));
     }
 
     // PDF: /auth/login

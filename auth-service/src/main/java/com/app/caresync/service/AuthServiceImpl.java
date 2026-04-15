@@ -1,13 +1,14 @@
 package com.app.caresync.service;
 
+import com.app.caresync.dto.*;
+import com.app.caresync.exception.EmailAlreadyExistsException;
+import com.app.caresync.exception.InvalidPasswordException;
+import com.app.caresync.exception.UserNotFoundException;
 import com.app.caresync.model.User;
 import com.app.caresync.model.UserRole;
 import com.app.caresync.repository.UserRepository;
 import com.app.caresync.security.JwtUtils;
 import com.app.caresync.security.UserDetailsImpl;
-
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,9 +33,69 @@ public class AuthServiceImpl implements AuthService {
     private JwtUtils jwtUtils;
 
     @Override
+    public JwtResponse authenticateUser(LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateToken(authentication);
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        String role = userDetails.getAuthorities().iterator().next().getAuthority();
+
+        return new JwtResponse(jwt, userDetails.getUsername(), role);
+    }
+
+    @Override
+    public String registerUser(SignupRequest signUpRequest) {
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            throw new EmailAlreadyExistsException("Error: Email is already in use!");
+        }
+
+        User user = new User();
+        user.setFullName(signUpRequest.getFullName());
+        user.setEmail(signUpRequest.getEmail());
+        user.setPhone(signUpRequest.getPhone());
+        user.setPasswordHash(encoder.encode(signUpRequest.getPassword()));
+
+        UserRole role = (signUpRequest.getRole() != null) ? 
+                UserRole.valueOf(signUpRequest.getRole().toUpperCase()) : UserRole.PATIENT;
+        user.setRole(role);
+
+        userRepository.save(user);
+        return "User registered successfully!";
+    }
+
+    @Override
+    public String changePassword(String email, PasswordChangeRequest request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+        
+        if(!encoder.matches(request.getOldPassword(), user.getPasswordHash())) {
+            throw new InvalidPasswordException("Error : Invalid password");
+        }
+        
+        user.setPasswordHash(encoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        
+        return "Password updated successfully";
+    }
+
+    @Override
+    public String deactivateUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+
+        user.setActive(false);
+        userRepository.save(user);
+
+        return "Account deactivated successfully!";
+    }
+
+    @Override
     public User register(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("Error: Email is already in use!");
+            throw new EmailAlreadyExistsException("Error: Email is already in use!");
         }
         user.setPasswordHash(encoder.encode(user.getPasswordHash()));
         return userRepository.save(user);
@@ -61,20 +122,19 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String refreshToken(String token) {
-        // Implementation for refreshing token
         return null; 
     }
 
     @Override
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
     }
 
     @Override
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
     }
 
     @Override
