@@ -94,7 +94,7 @@ public class ProviderServiceImpl implements ProviderService {
 
     @Override
     public List<ProviderResponse> getAllProviders() {
-        return providerRepository.findAllProvidersByStatus(ProviderStatus.APPROVED).stream()
+        return providerRepository.findByStatus(ProviderStatus.APPROVED).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -133,7 +133,7 @@ public class ProviderServiceImpl implements ProviderService {
 
     @Override
     public List<ProviderResponse> getPendingProviders() {
-        return providerRepository.findAllProvidersByStatus(ProviderStatus.PENDING).stream()
+        return providerRepository.findByStatus(ProviderStatus.PENDING).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }

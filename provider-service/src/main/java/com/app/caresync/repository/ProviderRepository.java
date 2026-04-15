@@ -31,7 +31,7 @@ public interface ProviderRepository extends JpaRepository<Provider, Long> {
     // PDF: countBySpecialization()
     long countBySpecialization(String specialization);
 
-    List<Provider> findAllProvidersByStatus(ProviderStatus status);
+    List<Provider> findByStatus(ProviderStatus status);
 
     // PDF: searchByNameOrSpecialization() - Full text search
     @Query("SELECT p FROM Provider p WHERE " +
