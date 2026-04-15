@@ -74,8 +74,34 @@
   }
 }
 
+  .label-xs {
+    @apply block text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1.5;
+  }
+
+  /* Scrollbar hide */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+}
+
 /* Custom Grain Effect for that premium SaaS feel */
 .bg-grain {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   opacity: 0.05;
 }
+
+  /* Utility for small uppercase labels used in forms */
+  .label-xs {
+    @apply block text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1.5;
+  }
+
+  /* Hide scrollbars but keep scroll functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }

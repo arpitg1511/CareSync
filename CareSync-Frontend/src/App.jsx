@@ -8,16 +8,17 @@ import Profile from './pages/Profile';
 import Appointments from './pages/Appointments';
 import AdminHub from './pages/AdminHub';
 import ProviderProfile from './pages/ProviderProfile';
-import ManageAvailability from './pages/ManageAvailability';
 import MedicalRecords from './pages/MedicalRecords';
+import Payments from './pages/Payments';
 import Reviews from './pages/Reviews';
+import Notifications from './pages/Notifications';
+import SlotManager from './pages/SlotManager';
 
 function App() {
   return (
     <Router>
       <div className="bg-background min-h-screen text-foreground font-sans selection:bg-medical-500/30">
         <div className="fixed inset-0 pointer-events-none z-[9999] bg-grain" />
-        
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -27,9 +28,11 @@ function App() {
           <Route path="/provider-profile" element={<ProviderProfile />} />
           <Route path="/appointments" element={<Appointments />} />
           <Route path="/admin" element={<AdminHub />} />
-          <Route path="/availability" element={<ManageAvailability />} />
           <Route path="/records" element={<MedicalRecords />} />
+          <Route path="/payments" element={<Payments />} />
           <Route path="/reviews" element={<Reviews />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/slots" element={<SlotManager />} />
         </Routes>
       </div>
     </Router>

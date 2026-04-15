@@ -1,10 +1,7 @@
 package com.app.caresync.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
@@ -21,14 +18,19 @@ public class AvailabilitySlot {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long slotId;
 
+    @Column(nullable = false)
     private Long providerId;
 
+    @Column(nullable = false)
     private LocalDate date;
 
+    @Column(nullable = false)
     private LocalTime startTime;
 
+    @Column(nullable = false)
     private LocalTime endTime;
 
+    @Column(nullable = false)
     private Integer durationMinutes;
 
     @Builder.Default
@@ -37,10 +39,10 @@ public class AvailabilitySlot {
     @Builder.Default
     private Boolean isBlocked = false;
 
-    private String recurrence;
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private Recurrence recurrence = Recurrence.NONE;
 
-    @Version
-    private Integer version; // Optimistic locking to prevent double-booking
-
+    @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 }

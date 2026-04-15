@@ -1,7 +1,2 @@
 package com.app.caresync.model;
-
-public enum ProviderStatus {
-	REJECTED,
-	PENDING,
-	APPROVED
-}
+public enum ProviderStatus { PENDING, APPROVED, REJECTED, SUSPENDED }

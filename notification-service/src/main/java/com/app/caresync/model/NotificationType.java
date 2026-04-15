@@ -1,0 +1,3 @@
+package com.app.caresync.model;
+// PDF: type (BOOKING/REMINDER/CANCELLATION/PAYMENT/FOLLOWUP)
+public enum NotificationType { BOOKING, REMINDER, CANCELLATION, PAYMENT, FOLLOWUP, SYSTEM }

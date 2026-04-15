@@ -1,40 +1,46 @@
 package com.app.caresync.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notifications")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class Notification {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long notificationId;
 
+    @Column(nullable = false)
     private Long recipientId;
 
-    private String type; // BOOKING, REMINDER, CANCELLATION, PAYMENT, FOLLOWUP
+    @Column(nullable = false)
+    private String recipientRole; // PATIENT, DOCTOR, ADMIN
 
+    @Column(nullable = false)
     private String title;
 
+    @Column(nullable = false, length = 2000)
     private String message;
 
-    private String channel; // APP, EMAIL, SMS
+    // PDF: type (BOOKING/REMINDER/CANCELLATION/PAYMENT/FOLLOWUP)
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private NotificationType type = NotificationType.SYSTEM;
 
+    // PDF: channel (APP/EMAIL/SMS)
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private NotificationChannel channel = NotificationChannel.APP;
+
+    // PDF: relatedId and relatedType for deep-linking
     private Long relatedId;
-
-    private String relatedType;
+    private String relatedType; // APPOINTMENT, PAYMENT, REVIEW, RECORD
 
     @Builder.Default
     private Boolean isRead = false;
 
+    // PDF: sentAt field
+    @Builder.Default
     private LocalDateTime sentAt = LocalDateTime.now();
 }

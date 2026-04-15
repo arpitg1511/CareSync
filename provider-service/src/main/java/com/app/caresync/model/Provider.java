@@ -1,52 +1,55 @@
 package com.app.caresync.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import java.time.LocalDate;
+import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "providers")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class Provider {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long providerId;
 
+    @Column(name = "user_id", nullable = false, unique = true)
     private Long userId;
 
+    @Column(nullable = false)
     private String fullName;
+
+    @Column(nullable = false)
     private String email;
+
+    @Column(nullable = false)
     private String specialization;
-    private String qualification;
-    private Integer experienceMonths;
-    private Integer experienceYears;
-    
-    @Column(columnDefinition = "TEXT")
-    private String bio;
+
+    private String qualification;       // PDF: qualification field
+    private Integer experienceYears;    // PDF: experienceYears (renamed from months)
+    private Integer experienceMonths;   // kept for legacy compat
+
+    @Column(length = 2000)
+    private String bio;                 // PDF: bio field
 
     private String clinicName;
-    private String address;
-    private String clinicAddress;
+    private String clinicAddress;       // PDF: clinicAddress
+    private String address;             // alias
+
     private String contact;
 
-    private Double avgRating = 0.0;
+    @Builder.Default
+    private Double avgRating = 0.0;    // PDF: avgRating field
 
     @Builder.Default
-    private Boolean isVerified = false;
+    private Boolean isVerified = false; // PDF: isVerified field
 
     @Builder.Default
-    private Boolean isAvailable = true;
+    private Boolean isAvailable = true; // PDF: isAvailable field
 
     @Enumerated(EnumType.STRING)
-    private ProviderStatus status;
+    @Builder.Default
+    private ProviderStatus status = ProviderStatus.PENDING;
 
     @Builder.Default
-    private LocalDate createdAt = LocalDate.now();
+    private LocalDateTime createdAt = LocalDateTime.now(); // PDF: createdAt field
 }

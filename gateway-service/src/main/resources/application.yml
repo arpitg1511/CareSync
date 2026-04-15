@@ -16,8 +16,8 @@ spring:
         - id: auth-service
           uri: ${AUTH_SERVICE_URL:http://localhost:8081}
           predicates:
-            - Path=/auth/**, /api/auth/**
-            
+            - Path=/api/auth/**
+
         - id: provider-service
           uri: ${PROVIDER_SERVICE_URL:http://localhost:8082}
           predicates:
@@ -31,29 +31,29 @@ spring:
         - id: appointment-service
           uri: ${APPOINTMENT_SERVICE_URL:http://localhost:8084}
           predicates:
-            - Path=/appointments/**, /api/appointments/**
+            - Path=/api/appointments/**
 
         - id: schedule-service
           uri: ${SCHEDULE_SERVICE_URL:http://localhost:8085}
           predicates:
-            - Path=/slots/**
+            - Path=/api/slots/**
 
         - id: payment-service
           uri: ${PAYMENT_SERVICE_URL:http://localhost:8086}
           predicates:
-            - Path=/payments/**
+            - Path=/api/payments/**
 
         - id: review-service
           uri: ${REVIEW_SERVICE_URL:http://localhost:8087}
           predicates:
-            - Path=/reviews/**
+            - Path=/api/reviews/**
 
         - id: record-service
           uri: ${RECORD_SERVICE_URL:http://localhost:8088}
           predicates:
-            - Path=/records/**
+            - Path=/api/records/**
 
         - id: notification-service
           uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8089}
           predicates:
-            - Path=/notifications/**
+            - Path=/api/notifications/**

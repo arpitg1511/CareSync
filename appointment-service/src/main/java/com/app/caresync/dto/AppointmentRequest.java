@@ -1,17 +1,14 @@
 package com.app.caresync.dto;
 
-import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class AppointmentRequest {
     private Long providerId;
+    private Long slotId;                  // optional – links to schedule-service slot
     private LocalDateTime appointmentDateTime;
     private String reason;
+    private String modeOfConsultation;    // IN_PERSON | TELECONSULTATION
+    private String serviceType;           // General Consultation, Follow-Up, etc.
 }
