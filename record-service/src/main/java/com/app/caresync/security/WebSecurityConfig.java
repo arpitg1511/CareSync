@@ -13,9 +13,13 @@ public class WebSecurityConfig {
     @Bean public AuthTokenFilter authenticationJwtTokenFilter() { return new AuthTokenFilter(); }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(c -> c.disable())
+        http.cors(cors -> cors.configure(http))
+            .csrf(csrf -> csrf.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(a -> a.anyRequest().authenticated());
+            .authorizeHttpRequests(auth ->
+                auth.requestMatchers("/", "/error").permitAll()
+                    .anyRequest().authenticated()
+            );
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
