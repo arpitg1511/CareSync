@@ -32,7 +32,7 @@ public class ProviderController {
     }
 
     // PDF: GET by specialization
-    @GetMapping("/specialization/{spec}")
+    @GetMapping("/speciality/{spec}")
     public ResponseEntity<List<ProviderResponse>> getBySpec(@PathVariable String spec) {
         return ResponseEntity.ok(providerService.getProvidersBySpecialization(spec));
     }
