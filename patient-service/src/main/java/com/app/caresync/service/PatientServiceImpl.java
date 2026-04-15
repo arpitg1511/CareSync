@@ -6,6 +6,7 @@ import com.app.caresync.client.AuthClient;
 import com.app.caresync.dto.UserDTO;
 import com.app.caresync.dto.PatientRequest;
 import com.app.caresync.dto.PatientResponse;
+import com.app.caresync.exception.PatientNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,21 +38,26 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public PatientResponse getProfile(String email) {
-        Patient patient = patientRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Patient profile not found"));
+        Patient patient = patientRepository.findByEmail(email)
+                .orElseThrow(() -> new PatientNotFoundException("Patient profile not found for email: " + email));
         return mapToResponse(patient);
     }
 
     @Override
     public PatientResponse updateProfile(String email, PatientRequest request) {
-        Patient existing = patientRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Patient profile not found"));
+        Patient existing = patientRepository.findByEmail(email)
+                .orElseThrow(() -> new PatientNotFoundException("Patient profile not found for email: " + email));
+        
         existing.setAddress(request.getAddress());
         existing.setEmergencyContact(request.getEmergencyContact());
         existing.setMedicalHistory(request.getMedicalHistory());
         existing.setBloodGroup(request.getBloodGroup());
+        
         return mapToResponse(patientRepository.save(existing));
     }
 
     private PatientResponse mapToResponse(Patient p) {
+        if (p == null) return null;
         return PatientResponse.builder()
                 .patientId(p.getPatientId())
                 .userId(p.getUserId())
