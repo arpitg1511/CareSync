@@ -20,7 +20,7 @@ public class ProviderController {
     private ProviderService providerService;
 
     // PDF: GET all verified providers (guest/patient)
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<ProviderResponse>> getAll() {
         return ResponseEntity.ok(providerService.getAllProviders());
     }
