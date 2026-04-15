@@ -19,10 +19,12 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
+        http.cors(cors -> cors.configure(http))
+            .csrf(csrf -> csrf.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth ->
-                auth.requestMatchers("/api/slots/internal/**", "/api/slots/available", "/api/slots/upcoming/**").permitAll()
+                auth.requestMatchers("/", "/error").permitAll()
+                    .requestMatchers("/api/slots/internal/**", "/api/slots/available", "/api/slots/upcoming/**").permitAll()
                     .anyRequest().authenticated()
             );
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

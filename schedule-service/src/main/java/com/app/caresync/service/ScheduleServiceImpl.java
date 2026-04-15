@@ -1,15 +1,18 @@
 package com.app.caresync.service;
 
+import com.app.caresync.dto.SlotRequest;
+import com.app.caresync.dto.SlotResponse;
+import com.app.caresync.exception.SlotNotFoundException;
 import com.app.caresync.model.AvailabilitySlot;
+import com.app.caresync.model.Recurrence;
 import com.app.caresync.repository.SlotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService {
@@ -18,76 +21,144 @@ public class ScheduleServiceImpl implements ScheduleService {
     private SlotRepository slotRepository;
 
     @Override
-    public AvailabilitySlot addSlot(AvailabilitySlot slot) {
-        return slotRepository.save(slot);
+    public SlotResponse addSlot(SlotRequest request) {
+        AvailabilitySlot slot = buildSlot(request);
+        return mapToResponse(slotRepository.save(slot));
     }
 
     @Override
-    public List<AvailabilitySlot> addBulkSlots(List<AvailabilitySlot> slots) {
-        return slotRepository.saveAll(slots);
+    public List<SlotResponse> addBulkSlots(List<SlotRequest> requests) {
+        List<AvailabilitySlot> slots = requests.stream()
+                .map(this::buildSlot)
+                .collect(Collectors.toList());
+        return slotRepository.saveAll(slots).stream()
+                .map(this::mapToResponse).collect(Collectors.toList());
     }
 
     @Override
-    public List<AvailabilitySlot> getSlotsByProvider(Long providerId) {
-        return slotRepository.findByProviderId(providerId);
+    public List<SlotResponse> generateRecurringSlots(SlotRequest request) {
+        List<AvailabilitySlot> slots = new ArrayList<>();
+        LocalDate current = request.getDate();
+        LocalDate end = request.getEndDate() != null ? request.getEndDate() : current.plusWeeks(4);
+        String pattern = request.getRecurrencePattern() != null ? request.getRecurrencePattern().toUpperCase() : "DAILY";
+
+        while (!current.isAfter(end)) {
+            AvailabilitySlot slot = AvailabilitySlot.builder()
+                    .providerId(request.getProviderId())
+                    .date(current)
+                    .startTime(request.getStartTime())
+                    .endTime(request.getEndTime())
+                    .durationMinutes(request.getDurationMinutes() != null ? request.getDurationMinutes() : 30)
+                    .recurrence("WEEKLY".equals(pattern) ? Recurrence.WEEKLY : Recurrence.DAILY)
+                    .isBooked(false)
+                    .isBlocked(false)
+                    .build();
+            slots.add(slot);
+            current = "WEEKLY".equals(pattern) ? current.plusWeeks(1) : current.plusDays(1);
+        }
+        return slotRepository.saveAll(slots).stream()
+                .map(this::mapToResponse).collect(Collectors.toList());
     }
 
     @Override
-    @org.springframework.cache.annotation.Cacheable(value = "slots", key = "#providerId + '-' + #date")
-    public List<AvailabilitySlot> getAvailableSlots(Long providerId, LocalDate date) {
-        return slotRepository.findAvailableByProviderAndDate(providerId, date);
+    public List<SlotResponse> getSlotsByProvider(Long providerId) {
+        return slotRepository.findByProviderId(providerId).stream()
+                .map(this::mapToResponse).collect(Collectors.toList());
     }
 
     @Override
-    public Optional<AvailabilitySlot> getSlotById(Long slotId) {
-        return slotRepository.findById(slotId);
+    public List<SlotResponse> getAvailableSlotsByProviderAndDate(Long providerId, LocalDate date) {
+        return slotRepository.findAvailableByProviderAndDate(providerId, date).stream()
+                .map(this::mapToResponse).collect(Collectors.toList());
     }
 
     @Override
-    public void bookSlot(Long slotId) {
-        slotRepository.findById(slotId).ifPresent(s -> {
-            s.setIsBooked(true);
-            slotRepository.save(s);
-        });
+    public List<SlotResponse> getUpcomingAvailableSlots(Long providerId) {
+        return slotRepository.findUpcomingAvailableByProvider(providerId).stream()
+                .map(this::mapToResponse).collect(Collectors.toList());
     }
 
     @Override
-    public void unblockSlot(Long slotId) {
-        slotRepository.findById(slotId).ifPresent(s -> {
-            s.setIsBlocked(false);
-            slotRepository.save(s);
-        });
+    public SlotResponse getSlotById(Long slotId) {
+        return slotRepository.findById(slotId)
+                .map(this::mapToResponse)
+                .orElseThrow(() -> new SlotNotFoundException("Slot not found: " + slotId));
+    }
+
+    @Override
+    public SlotResponse updateSlot(Long slotId, SlotRequest request) {
+        AvailabilitySlot slot = slotRepository.findById(slotId)
+                .orElseThrow(() -> new SlotNotFoundException("Slot not found: " + slotId));
+        if (Boolean.TRUE.equals(slot.getIsBooked())) throw new RuntimeException("Cannot update a booked slot");
+        if (request.getDate() != null) slot.setDate(request.getDate());
+        if (request.getStartTime() != null) slot.setStartTime(request.getStartTime());
+        if (request.getEndTime() != null) slot.setEndTime(request.getEndTime());
+        if (request.getDurationMinutes() != null) slot.setDurationMinutes(request.getDurationMinutes());
+        return mapToResponse(slotRepository.save(slot));
+    }
+
+    @Override
+    public SlotResponse bookSlot(Long slotId) {
+        AvailabilitySlot slot = slotRepository.findById(slotId)
+                .orElseThrow(() -> new SlotNotFoundException("Slot not found: " + slotId));
+        if (Boolean.TRUE.equals(slot.getIsBooked())) throw new RuntimeException("Slot already booked");
+        if (Boolean.TRUE.equals(slot.getIsBlocked())) throw new RuntimeException("Slot is blocked");
+        slot.setIsBooked(true);
+        return mapToResponse(slotRepository.save(slot));
+    }
+
+    @Override
+    public SlotResponse releaseSlot(Long slotId) {
+        AvailabilitySlot slot = slotRepository.findById(slotId)
+                .orElseThrow(() -> new SlotNotFoundException("Slot not found: " + slotId));
+        slot.setIsBooked(false);
+        return mapToResponse(slotRepository.save(slot));
+    }
+
+    @Override
+    public SlotResponse blockSlot(Long slotId) {
+        AvailabilitySlot slot = slotRepository.findById(slotId)
+                .orElseThrow(() -> new SlotNotFoundException("Slot not found: " + slotId));
+        slot.setIsBlocked(true);
+        return mapToResponse(slotRepository.save(slot));
+    }
+
+    @Override
+    public SlotResponse unblockSlot(Long slotId) {
+        AvailabilitySlot slot = slotRepository.findById(slotId)
+                .orElseThrow(() -> new SlotNotFoundException("Slot not found: " + slotId));
+        slot.setIsBlocked(false);
+        return mapToResponse(slotRepository.save(slot));
     }
 
     @Override
     public void deleteSlot(Long slotId) {
+        if (!slotRepository.existsById(slotId)) {
+            throw new SlotNotFoundException("Slot not found: " + slotId);
+        }
         slotRepository.deleteById(slotId);
     }
 
-    @Override
-    public AvailabilitySlot updateSlot(Long slotId, AvailabilitySlot slot) {
-        slot.setSlotId(slotId);
-        return slotRepository.save(slot);
+    private AvailabilitySlot buildSlot(SlotRequest r) {
+        return AvailabilitySlot.builder()
+                .providerId(r.getProviderId())
+                .date(r.getDate())
+                .startTime(r.getStartTime())
+                .endTime(r.getEndTime())
+                .durationMinutes(r.getDurationMinutes() != null ? r.getDurationMinutes() : 30)
+                .recurrence(r.getRecurrence() != null ? r.getRecurrence() : Recurrence.NONE)
+                .isBooked(false)
+                .isBlocked(false)
+                .build();
     }
 
-    @Override
-    public void blockSlot(Long slotId) {
-        slotRepository.findById(slotId).ifPresent(s -> {
-            s.setIsBlocked(true);
-            slotRepository.save(s);
-        });
-    }
-
-    @Override
-    public List<AvailabilitySlot> generateRecurringSlots(Long providerId, String pattern, LocalDate startDate, LocalDate endDate) {
-        // Implementation for Section 2.5: Recurring slot generation
-        return null;
-    }
-
-    // 🧹 Section 2.5: Automatically purge expired slots (past date/time with no booking)
-    @Scheduled(cron = "0 0 * * * *") // Every hour
-    @Transactional
-    public void purgeExpiredSlots() {
-        // Logic to delete slots where date < current_date OR (date == current_date AND endTime < current_time) AND isBooked = false
+    private SlotResponse mapToResponse(AvailabilitySlot s) {
+        if (s == null) return null;
+        return SlotResponse.builder()
+                .slotId(s.getSlotId()).providerId(s.getProviderId()).date(s.getDate())
+                .startTime(s.getStartTime()).endTime(s.getEndTime())
+                .durationMinutes(s.getDurationMinutes()).isBooked(s.getIsBooked())
+                .isBlocked(s.getIsBlocked()).recurrence(s.getRecurrence())
+                .createdAt(s.getCreatedAt()).build();
     }
 }
