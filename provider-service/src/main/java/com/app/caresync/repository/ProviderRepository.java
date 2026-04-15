@@ -40,6 +40,6 @@ public interface ProviderRepository extends JpaRepository<Provider, Long> {
            "LOWER(p.clinicName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(p.clinicAddress) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(p.address) LIKE LOWER(CONCAT('%', :query, '%'))) " +
-           "AND p.status = com.app.caresync.model.ProviderStatus.APPROVED")
+           "AND p.status = 'APPROVED'")
     List<Provider> searchProviders(@Param("query") String query);
 }

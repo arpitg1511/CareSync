@@ -9,7 +9,6 @@ import com.app.caresync.model.Provider;
 import com.app.caresync.model.ProviderStatus;
 import com.app.caresync.repository.ProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,36 +23,40 @@ public class ProviderServiceImpl implements ProviderService {
     @Autowired
     private AuthClient authClient;
 
-    // 🔄 Mapping Helper
     private ProviderResponse mapToResponse(Provider p) {
         if (p == null) return null;
-        return ProviderResponse.builder()
-                .providerId(p.getProviderId())
-                .userId(p.getUserId())
-                .fullName(p.getFullName())
-                .email(p.getEmail())
-                .specialization(p.getSpecialization())
-                .qualification(p.getQualification())
-                .experienceYears(p.getExperienceYears())
-                .experienceMonths(p.getExperienceMonths())
-                .bio(p.getBio())
-                .clinicName(p.getClinicName())
-                .clinicAddress(p.getClinicAddress() != null ? p.getClinicAddress() : p.getAddress())
-                .address(p.getAddress())
-                .contact(p.getContact())
-                .avgRating(p.getAvgRating())
-                .isVerified(p.getIsVerified())
-                .isAvailable(p.getIsAvailable())
-                .status(p.getStatus() != null ? p.getStatus().name() : "PENDING")
-                .createdAt(p.getCreatedAt())
-                .build();
+        try {
+            return ProviderResponse.builder()
+                    .providerId(p.getProviderId())
+                    .userId(p.getUserId())
+                    .fullName(p.getFullName())
+                    .email(p.getEmail())
+                    .specialization(p.getSpecialization())
+                    .qualification(p.getQualification())
+                    .experienceYears(p.getExperienceYears() != null ? p.getExperienceYears() : 0)
+                    .experienceMonths(p.getExperienceMonths() != null ? p.getExperienceMonths() : 0)
+                    .bio(p.getBio())
+                    .clinicName(p.getClinicName())
+                    .clinicAddress(p.getClinicAddress() != null ? p.getClinicAddress() : p.getAddress())
+                    .address(p.getAddress())
+                    .contact(p.getContact())
+                    .avgRating(p.getAvgRating() != null ? p.getAvgRating() : 0.0)
+                    .isVerified(p.getIsVerified() != null ? p.getIsVerified() : false)
+                    .isAvailable(p.getIsAvailable() != null ? p.getIsAvailable() : true)
+                    .status(p.getStatus() != null ? p.getStatus().name() : "PENDING")
+                    .createdAt(p.getCreatedAt())
+                    .build();
+        } catch (Exception e) {
+            // Log mapping error for a specific row
+            System.err.println("Mapping error for provider ID " + p.getProviderId() + ": " + e.getMessage());
+            return null;
+        }
     }
 
     @Override
     public ProviderResponse saveProvider(String email, ProviderRequest request) {
         UserDTO user = authClient.getUserByEmail(email);
 
-        // Update if exists, else create
         Provider provider = providerRepository.findByUserId(user.getUserId())
                 .orElse(Provider.builder()
                         .userId(user.getUserId())
@@ -85,10 +88,10 @@ public class ProviderServiceImpl implements ProviderService {
     }
 
     @Override
-    @Cacheable(value = "providers", key = "#query")
     public List<ProviderResponse> searchProviders(String query) {
         return providerRepository.searchProviders(query).stream()
                 .map(this::mapToResponse)
+                .filter(res -> res != null)
                 .collect(Collectors.toList());
     }
 
@@ -96,6 +99,7 @@ public class ProviderServiceImpl implements ProviderService {
     public List<ProviderResponse> getAllProviders() {
         return providerRepository.findByStatus(ProviderStatus.APPROVED).stream()
                 .map(this::mapToResponse)
+                .filter(res -> res != null)
                 .collect(Collectors.toList());
     }
 
@@ -103,6 +107,7 @@ public class ProviderServiceImpl implements ProviderService {
     public List<ProviderResponse> getProvidersBySpecialization(String specialization) {
         return providerRepository.findBySpecialization(specialization).stream()
                 .map(this::mapToResponse)
+                .filter(res -> res != null)
                 .collect(Collectors.toList());
     }
 
@@ -135,6 +140,7 @@ public class ProviderServiceImpl implements ProviderService {
     public List<ProviderResponse> getPendingProviders() {
         return providerRepository.findByStatus(ProviderStatus.PENDING).stream()
                 .map(this::mapToResponse)
+                .filter(res -> res != null)
                 .collect(Collectors.toList());
     }
 
