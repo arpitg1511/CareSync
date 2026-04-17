@@ -7,11 +7,13 @@ spring:
   cloud:
     gateway:
       globalcors:
+        add-to-gateway-request-chain: true
         cors-configurations:
           '[/**]':
-            allowedOrigins: "*"
+            allowedOriginPatterns: "*"
             allowedMethods: "*"
             allowedHeaders: "*"
+            allowCredentials: true
       routes:
         - id: auth-service
           uri: ${AUTH_SERVICE_URL:http://localhost:8081}
@@ -22,6 +24,8 @@ spring:
           uri: ${PROVIDER_SERVICE_URL:http://localhost:8082}
           predicates:
             - Path=/api/providers/**, /api/admin/**
+          filters:
+            - RewritePath=/api/admin/(?<segment>.*), /api/providers/admin/$\{segment}
 
         - id: patient-service
           uri: ${PATIENT_SERVICE_URL:http://localhost:8083}

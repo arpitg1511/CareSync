@@ -18,4 +18,5 @@ public interface ProviderService {
     List<ProviderResponse> getPendingProviders();
     void deleteProvider(Long providerId);
     boolean existsById(Long id);
+    void createProviderFromUser(java.util.Map<String, Object> data);
 }

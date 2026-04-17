@@ -46,6 +46,9 @@ public class AuthServiceImpl implements AuthService {
         return new JwtResponse(jwt, userDetails.getUsername(), role);
     }
 
+    @Autowired
+    private com.app.caresync.client.ProviderClient providerClient;
+
     @Override
     public String registerUser(SignupRequest signUpRequest) {
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
@@ -62,7 +65,34 @@ public class AuthServiceImpl implements AuthService {
                 UserRole.valueOf(signUpRequest.getRole().toUpperCase()) : UserRole.PATIENT;
         user.setRole(role);
 
-        userRepository.save(user);
+        System.out.println("DEBUG: Registering User with Role: " + role + " (Input was: " + signUpRequest.getRole() + ")");
+
+        User savedUser = userRepository.save(user);
+
+        // 🔗 If the user is a Doctor, notify the provider-service to create a pending profile
+        if (role == UserRole.DOCTOR) {
+            try {
+                System.out.println("🔄 Syncing Doctor Profile to Provider-Service for: " + savedUser.getEmail());
+                java.util.Map<String, Object> providerData = new java.util.HashMap<>();
+                providerData.put("userId", savedUser.getUserId());
+                providerData.put("name", savedUser.getFullName());
+                providerData.put("email", savedUser.getEmail());
+                
+                // Ensure speciality is NEVER null (DB constraint)
+                String spec = signUpRequest.getSpeciality();
+                if (spec == null || spec.trim().isEmpty()) {
+                    spec = "General Medicine";
+                }
+                providerData.put("speciality", spec);
+                
+                providerClient.createProviderProfile(providerData);
+                System.out.println("✅ Sync Successful for " + savedUser.getEmail() + " with Specialty: " + spec);
+            } catch (Exception e) {
+                System.err.println("❌ SYNC FAILED: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
         return "User registered successfully!";
     }
 

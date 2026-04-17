@@ -97,7 +97,7 @@ public class ProviderServiceImpl implements ProviderService {
 
     @Override
     public List<ProviderResponse> getAllProviders() {
-        return providerRepository.findByStatus(ProviderStatus.APPROVED).stream()
+        return providerRepository.findAll().stream()
                 .map(this::mapToResponse)
                 .filter(res -> res != null)
                 .collect(Collectors.toList());
@@ -155,5 +155,27 @@ public class ProviderServiceImpl implements ProviderService {
     @Override
     public boolean existsById(Long id) {
         return providerRepository.existsById(id);
+    }
+
+    @Override
+    public void createProviderFromUser(java.util.Map<String, Object> data) {
+        System.out.println("📥 RECEIVED Sync Request for Doctor Profile: " + data.get("email"));
+        Long userId = Long.valueOf(data.get("userId").toString());
+        String name = (String) data.get("name");
+        String email = (String) data.get("email");
+        String speciality = (String) data.get("speciality");
+
+        // Use builder if available, or just create new
+        Provider provider = Provider.builder()
+                .userId(userId)
+                .fullName(name)
+                .email(email)
+                .specialization(speciality)
+                .status(ProviderStatus.PENDING)
+                .isVerified(false)
+                .isAvailable(true)
+                .build();
+        
+        providerRepository.save(provider);
     }
 }

@@ -97,4 +97,10 @@ public class ProviderController {
     public ResponseEntity<ProviderResponse> updateRating(@PathVariable Long id, @RequestParam Double avgRating) {
         return ResponseEntity.ok(providerService.updateRating(id, avgRating));
     }
+
+    // Internal: Create profile from Auth-Service
+    @PostMapping("/internal/create")
+    public void createProviderInternal(@RequestBody java.util.Map<String, Object> data) {
+        providerService.createProviderFromUser(data);
+    }
 }
