@@ -17,7 +17,7 @@ public interface ProviderRepository extends JpaRepository<Provider, Long> {
     Optional<Provider> findByEmail(String email);
 
     // PDF: findBySpecialization()
-    List<Provider> findBySpecialization(String specialization);
+    List<Provider> findBySpecializationIgnoreCase(String specialization);
 
     // PDF: findByIsVerified()
     List<Provider> findByIsVerified(Boolean isVerified);

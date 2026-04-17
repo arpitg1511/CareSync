@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "auth-service", url = "${auth.service.url}", configuration = FeignConfig.class)
 public interface AuthClient {
 
-    @GetMapping("/internal/users/email/{email}")
+    @GetMapping("/api/auth/internal/users/email/{email}")
     UserDTO getUserByEmail(@PathVariable("email") String email);
 }

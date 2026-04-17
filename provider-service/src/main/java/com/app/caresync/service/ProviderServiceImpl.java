@@ -105,7 +105,7 @@ public class ProviderServiceImpl implements ProviderService {
 
     @Override
     public List<ProviderResponse> getProvidersBySpecialization(String specialization) {
-        return providerRepository.findBySpecialization(specialization).stream()
+        return providerRepository.findBySpecializationIgnoreCase(specialization).stream()
                 .map(this::mapToResponse)
                 .filter(res -> res != null)
                 .collect(Collectors.toList());

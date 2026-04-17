@@ -18,7 +18,7 @@ public interface AuthService {
     String refreshToken(String token);
     User getUserByEmail(String email);
     User getUserById(Long userId);
-    User updateProfile(Long userId, User user);
+    User updateProfile(String email, UserDTO updates);
     void changePassword(Long userId, String newPassword);
     void deactivateAccount(Long userId);
 }

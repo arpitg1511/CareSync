@@ -141,6 +141,17 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public User updateProfile(String email, UserDTO updates) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+        
+        if (updates.getFullName() != null) user.setFullName(updates.getFullName());
+        if (updates.getPhone() != null) user.setPhone(updates.getPhone());
+        
+        return userRepository.save(user);
+    }
+
+    @Override
     public void logout(String token) {
         // Typically handled by Spring Security or JWT blacklisting
     }
