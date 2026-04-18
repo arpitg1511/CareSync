@@ -80,9 +80,15 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public List<AppointmentResponse> getMyAppointments() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        PatientResponse patient = patientClient.getPatientByEmail(email);
-        return appointmentRepository.findByPatientId(patient.getPatientId())
-                .stream().map(this::mapToResponse).collect(Collectors.toList());
+        try {
+            PatientResponse patient = patientClient.getPatientByEmail(email);
+            if (patient == null) return List.of();
+            return appointmentRepository.findByPatientId(patient.getPatientId())
+                    .stream().map(this::mapToResponse).collect(Collectors.toList());
+        } catch (Exception e) {
+            // If user has no patient profile (like Admin/Doctor), just return empty list
+            return List.of();
+        }
     }
 
     @Override
