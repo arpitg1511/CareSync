@@ -19,6 +19,7 @@ public interface AuthService {
     User getUserByEmail(String email);
     User getUserById(Long userId);
     User updateProfile(String email, UserDTO updates);
+    User updateProfile(Long userId, User user);
     void changePassword(Long userId, String newPassword);
     void deactivateAccount(Long userId);
 }
