@@ -9,9 +9,9 @@
 		<relativePath/>
 	</parent>
 	<groupId>com.app</groupId>
-	<artifactId>caresync-review-service</artifactId>
+	<artifactId>caresync-schedule-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>review-service</name>
+	<name>schedule-service</name>
 
 	<properties>
 		<java.version>17</java.version>
