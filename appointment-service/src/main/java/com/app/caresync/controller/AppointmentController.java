@@ -110,6 +110,6 @@ public class AppointmentController {
     @GetMapping("/provider/{providerId}/count")
     @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
     public ResponseEntity<Map<String, Long>> getCount(@PathVariable Long providerId) {
-        return ResponseEntity.ok(Map.of("count", appointmentService.getAppointmentCount(providerId)));
+        return ResponseEntity.ok(appointmentService.getAppointmentStats(providerId));
     }
 }

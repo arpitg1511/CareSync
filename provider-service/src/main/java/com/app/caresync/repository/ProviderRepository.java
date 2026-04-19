@@ -19,6 +19,12 @@ public interface ProviderRepository extends JpaRepository<Provider, Long> {
     // PDF: findBySpecialization()
     List<Provider> findBySpecializationIgnoreCase(String specialization);
 
+    @Query("SELECT p FROM Provider p WHERE p.status = com.app.caresync.model.ProviderStatus.APPROVED")
+    List<Provider> findAllApproved();
+
+    @Query("SELECT p FROM Provider p WHERE LOWER(p.specialization) = LOWER(:spec) AND p.status = com.app.caresync.model.ProviderStatus.APPROVED")
+    List<Provider> findBySpecializationApproved(@Param("spec") String spec);
+
     // PDF: findByIsVerified()
     List<Provider> findByIsVerified(Boolean isVerified);
 
@@ -40,6 +46,6 @@ public interface ProviderRepository extends JpaRepository<Provider, Long> {
            "LOWER(p.clinicName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(p.clinicAddress) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(p.address) LIKE LOWER(CONCAT('%', :query, '%'))) " +
-           "AND p.status = 'APPROVED'")
+           "AND p.status = com.app.caresync.model.ProviderStatus.APPROVED")
     List<Provider> searchProviders(@Param("query") String query);
 }

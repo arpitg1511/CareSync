@@ -9,6 +9,7 @@ import java.util.List;
 public interface ProviderService {
     ProviderResponse saveProvider(String email, ProviderRequest request);
     ProviderResponse getProviderById(Long providerId);
+    ProviderResponse getProviderByEmail(String email);
     List<ProviderResponse> searchProviders(String query);
     List<ProviderResponse> getAllProviders();
     List<ProviderResponse> getProvidersBySpecialization(String specialization);
@@ -19,4 +20,5 @@ public interface ProviderService {
     void deleteProvider(Long providerId);
     boolean existsById(Long id);
     void createProviderFromUser(java.util.Map<String, Object> data);
+    ProviderResponse reapply(Long providerId);
 }

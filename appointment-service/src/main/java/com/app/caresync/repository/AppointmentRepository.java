@@ -36,6 +36,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     // PDF: countByProviderId()
     long countByProviderId(Long providerId);
+    long countByProviderIdAndStatus(Long providerId, AppointmentStatus status);
 
     // For NoShowDetectionScheduler
     @Query("SELECT a FROM Appointment a WHERE a.status = 'SCHEDULED' " +

@@ -43,6 +43,12 @@ public class ProviderController {
         return ResponseEntity.ok(providerService.searchProviders(query));
     }
 
+    // PDF: GET by email
+    @GetMapping("/email/{email}")
+    public ResponseEntity<ProviderResponse> getByEmail(@PathVariable String email) {
+        return ResponseEntity.ok(providerService.getProviderByEmail(email));
+    }
+
     // PDF: POST register/update provider profile
     @PostMapping("/profile")
     @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
@@ -102,5 +108,11 @@ public class ProviderController {
     @PostMapping("/internal/create")
     public void createProviderInternal(@RequestBody java.util.Map<String, Object> data) {
         providerService.createProviderFromUser(data);
+    }
+
+    @PutMapping("/{id}/reapply")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<ProviderResponse> reapply(@PathVariable Long id) {
+        return ResponseEntity.ok(providerService.reapply(id));
     }
 }

@@ -37,6 +37,13 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
+    public PatientResponse getById(Long patientId) {
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new PatientNotFoundException("Patient not found with id: " + patientId));
+        return mapToResponse(patient);
+    }
+
+    @Override
     public PatientResponse getProfile(String email) {
         Patient patient = patientRepository.findByEmail(email)
                 .orElseThrow(() -> new PatientNotFoundException("Patient profile not found for email: " + email));
@@ -70,5 +77,21 @@ public class PatientServiceImpl implements PatientService {
                 .emergencyContact(p.getEmergencyContact())
                 .medicalHistory(p.getMedicalHistory())
                 .build();
+    }
+
+    @Override
+    public void createProfileFromUser(java.util.Map<String, Object> data) {
+        System.out.println("📥 RECEIVED Sync Request for Patient Profile: " + data.get("email"));
+        Long userId = Long.valueOf(data.get("userId").toString());
+        String name = (String) data.get("name");
+        String email = (String) data.get("email");
+
+        Patient patient = Patient.builder()
+                .userId(userId)
+                .fullName(name)
+                .email(email)
+                .build();
+        
+        patientRepository.save(patient);
     }
 }

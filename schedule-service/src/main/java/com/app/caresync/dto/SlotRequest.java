@@ -16,4 +16,6 @@ public class SlotRequest {
     // For bulk/recurring generation
     private LocalDate endDate;     // used for range
     private String recurrencePattern; // DAILY or WEEKLY
+    private Integer recurrenceWeeks;  // Number of weeks to repeat
+    private java.util.List<Integer> daysOfWeek; // 0=Sun, 1=Mon, etc.
 }

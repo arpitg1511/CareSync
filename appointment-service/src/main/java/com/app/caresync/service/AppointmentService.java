@@ -4,7 +4,7 @@ import com.app.caresync.dto.AppointmentRequest;
 import com.app.caresync.dto.AppointmentResponse;
 import com.app.caresync.model.AppointmentStatus;
 
-import java.util.List;
+import java.util.*;
 
 public interface AppointmentService {
     AppointmentResponse bookAppointment(AppointmentRequest request);
@@ -19,5 +19,5 @@ public interface AppointmentService {
     AppointmentResponse markNoShow(Long id);
     AppointmentResponse getById(Long id);
     List<AppointmentResponse> getAllForAdmin();
-    long getAppointmentCount(Long providerId);
+    Map<String, Long> getAppointmentStats(Long providerId);
 }

@@ -13,4 +13,5 @@ public class ProviderRequest {
     private String clinicAddress;
     private String address;
     private String contact;
+    private String name;
 }

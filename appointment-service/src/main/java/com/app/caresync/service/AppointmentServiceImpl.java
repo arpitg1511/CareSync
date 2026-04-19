@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +36,12 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public AppointmentResponse bookAppointment(AppointmentRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        PatientResponse patient = patientClient.getPatientByEmail(email);
+        PatientResponse patient;
+        try {
+            patient = patientClient.getPatientByEmail(email);
+        } catch (Exception e) {
+            throw new RuntimeException("Operational Error: No Patient Profile associated with this account. Only verified patients can initialize booking vectors.");
+        }
 
         if (!providerClient.checkIfProviderExists(request.getProviderId())) {
             throw new RuntimeException("Provider not found or not yet verified.");
@@ -203,13 +208,17 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public List<AppointmentResponse> getAllForAdmin() {
-        return appointmentRepository.findAll().stream().map(this::mapToResponse).collect(Collectors.toList());
+    public Map<String, Long> getAppointmentStats(Long providerId) {
+        return Map.of(
+            "total", appointmentRepository.countByProviderId(providerId),
+            "completed", appointmentRepository.countByProviderIdAndStatus(providerId, AppointmentStatus.COMPLETED),
+            "noShow", appointmentRepository.countByProviderIdAndStatus(providerId, AppointmentStatus.NO_SHOW)
+        );
     }
 
     @Override
-    public long getAppointmentCount(Long providerId) {
-        return appointmentRepository.countByProviderId(providerId);
+    public List<AppointmentResponse> getAllForAdmin() {
+        return appointmentRepository.findAll().stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
     private AppointmentResponse mapToResponse(Appointment a) {

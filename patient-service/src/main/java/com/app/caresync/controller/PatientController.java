@@ -35,4 +35,22 @@ public class PatientController {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(patientService.updateProfile(email, profile));
     }
+
+    // Internal: Get patient by their patientId (called by frontend for doctor's appointment view)
+    @GetMapping("/{id}")
+    public ResponseEntity<PatientResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(patientService.getById(id));
+    }
+
+    // 🔐 Internal: Get patient by email (called by appointment-service)
+    @GetMapping("/email/{email}")
+    public ResponseEntity<PatientResponse> getUserByEmailInternal(@PathVariable String email) {
+        return ResponseEntity.ok(patientService.getProfile(email));
+    }
+
+    // 🔐 Internal: Sync profile from auth-service (called on registration)
+    @PostMapping("/internal/create")
+    public void createProfileInternal(@RequestBody java.util.Map<String, Object> data) {
+        patientService.createProfileFromUser(data);
+    }
 }

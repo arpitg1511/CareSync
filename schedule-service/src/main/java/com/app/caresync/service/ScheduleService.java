@@ -20,4 +20,5 @@ public interface ScheduleService {
     SlotResponse blockSlot(Long slotId);
     SlotResponse unblockSlot(Long slotId);
     void deleteSlot(Long slotId);
+    void deleteSlotsByProviderAndDate(Long providerId, java.time.LocalDate date);
 }

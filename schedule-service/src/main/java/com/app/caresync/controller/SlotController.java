@@ -43,67 +43,77 @@ public class SlotController {
     // PDF: GET by provider
     @GetMapping("/provider/{providerId}")
     @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN', 'PATIENT')")
-    public ResponseEntity<List<SlotResponse>> getByProvider(@PathVariable Long providerId) {
+    public ResponseEntity<List<SlotResponse>> getByProvider(@PathVariable("providerId") Long providerId) {
         return ResponseEntity.ok(scheduleService.getSlotsByProvider(providerId));
     }
 
     // PDF: GET available slots by provider + date (guest/patient browsing)
     @GetMapping("/available")
     public ResponseEntity<List<SlotResponse>> getAvailable(
-            @RequestParam Long providerId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @RequestParam("providerId") Long providerId,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(scheduleService.getAvailableSlotsByProviderAndDate(providerId, date));
     }
 
     // Upcoming available slots
     @GetMapping("/upcoming/{providerId}")
-    public ResponseEntity<List<SlotResponse>> getUpcoming(@PathVariable Long providerId) {
+    public ResponseEntity<List<SlotResponse>> getUpcoming(@PathVariable("providerId") Long providerId) {
         return ResponseEntity.ok(scheduleService.getUpcomingAvailableSlots(providerId));
     }
 
     // PDF: GET by id
     @GetMapping("/{slotId}")
-    public ResponseEntity<SlotResponse> getById(@PathVariable Long slotId) {
+    public ResponseEntity<SlotResponse> getById(@PathVariable("slotId") Long slotId) {
         return ResponseEntity.ok(scheduleService.getSlotById(slotId));
     }
 
     // PDF: PUT updateSlot
     @PutMapping("/{slotId}")
     @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
-    public ResponseEntity<SlotResponse> update(@PathVariable Long slotId, @RequestBody SlotRequest request) {
+    public ResponseEntity<SlotResponse> update(@PathVariable("slotId") Long slotId, @RequestBody SlotRequest request) {
         return ResponseEntity.ok(scheduleService.updateSlot(slotId, request));
     }
 
     // PDF: PUT blockSlot
     @PutMapping("/{slotId}/block")
     @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
-    public ResponseEntity<SlotResponse> block(@PathVariable Long slotId) {
+    public ResponseEntity<SlotResponse> block(@PathVariable("slotId") Long slotId) {
         return ResponseEntity.ok(scheduleService.blockSlot(slotId));
     }
 
     // PDF: PUT unblockSlot
     @PutMapping("/{slotId}/unblock")
     @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
-    public ResponseEntity<SlotResponse> unblock(@PathVariable Long slotId) {
+    public ResponseEntity<SlotResponse> unblock(@PathVariable("slotId") Long slotId) {
         return ResponseEntity.ok(scheduleService.unblockSlot(slotId));
     }
 
     // Internal: book slot (called by appointment-service)
     @PutMapping("/internal/{slotId}/book")
-    public ResponseEntity<SlotResponse> bookSlot(@PathVariable Long slotId) {
+    public ResponseEntity<SlotResponse> bookSlot(@PathVariable("slotId") Long slotId) {
         return ResponseEntity.ok(scheduleService.bookSlot(slotId));
     }
 
     // Internal: release slot on cancellation
     @PutMapping("/internal/{slotId}/release")
-    public ResponseEntity<SlotResponse> releaseSlot(@PathVariable Long slotId) {
+    public ResponseEntity<SlotResponse> releaseSlot(@PathVariable("slotId") Long slotId) {
         return ResponseEntity.ok(scheduleService.releaseSlot(slotId));
     }
 
-    // PDF: DELETE
+    // PDF: DELETE provider day slots
+    @DeleteMapping("/provider/{providerId}/date/{date}")
+    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
+    public ResponseEntity<Void> deleteByDate(
+            @PathVariable("providerId") Long providerId,
+            @PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        scheduleService.deleteSlotsByProviderAndDate(providerId, date);
+        return ResponseEntity.noContent().build();
+    }
+
+    // PDF: DELETE single slot
     @DeleteMapping("/{slotId}")
     @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
-    public ResponseEntity<Void> delete(@PathVariable Long slotId) {
+    public ResponseEntity<Void> deleteSlot(@PathVariable("slotId") Long slotId) {
         scheduleService.deleteSlot(slotId);
         return ResponseEntity.noContent().build();
     }

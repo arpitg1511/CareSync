@@ -43,11 +43,18 @@ public class AuthServiceImpl implements AuthService {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         String role = userDetails.getAuthorities().iterator().next().getAuthority();
 
-        return new JwtResponse(jwt, userDetails.getUsername(), role);
+        User user = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
+        String fullName = user != null ? user.getFullName() : "";
+        String phone = user != null ? user.getPhone() : "";
+
+        return new JwtResponse(jwt, userDetails.getUsername(), role, fullName, phone);
     }
 
     @Autowired
     private com.app.caresync.client.ProviderClient providerClient;
+
+    @Autowired
+    private com.app.caresync.client.PatientClient patientClient;
 
     @Override
     public String registerUser(SignupRequest signUpRequest) {
@@ -69,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
 
         User savedUser = userRepository.save(user);
 
-        // 🔗 If the user is a Doctor, notify the provider-service to create a pending profile
+        // 🔗 If the user is a Doctor, notify the provider-service
         if (role == UserRole.DOCTOR) {
             try {
                 System.out.println("🔄 Syncing Doctor Profile to Provider-Service for: " + savedUser.getEmail());
@@ -77,8 +84,8 @@ public class AuthServiceImpl implements AuthService {
                 providerData.put("userId", savedUser.getUserId());
                 providerData.put("name", savedUser.getFullName());
                 providerData.put("email", savedUser.getEmail());
+                providerData.put("contact", savedUser.getPhone());
                 
-                // Ensure speciality is NEVER null (DB constraint)
                 String spec = signUpRequest.getSpeciality();
                 if (spec == null || spec.trim().isEmpty()) {
                     spec = "General Medicine";
@@ -86,10 +93,23 @@ public class AuthServiceImpl implements AuthService {
                 providerData.put("speciality", spec);
                 
                 providerClient.createProviderProfile(providerData);
-                System.out.println("✅ Sync Successful for " + savedUser.getEmail() + " with Specialty: " + spec);
             } catch (Exception e) {
-                System.err.println("❌ SYNC FAILED: " + e.getMessage());
-                e.printStackTrace();
+                System.err.println("❌ DOCTOR SYNC FAILED: " + e.getMessage());
+            }
+        } 
+        
+        // 🔗 If the user is a Patient, notify the patient-service
+        if (role == UserRole.PATIENT) {
+            try {
+                System.out.println("🔄 Syncing Patient Profile to Patient-Service for: " + savedUser.getEmail());
+                java.util.Map<String, Object> patientData = new java.util.HashMap<>();
+                patientData.put("userId", savedUser.getUserId());
+                patientData.put("name", savedUser.getFullName());
+                patientData.put("email", savedUser.getEmail());
+                
+                patientClient.createPatientProfile(patientData);
+            } catch (Exception e) {
+                System.err.println("❌ PATIENT SYNC FAILED: " + e.getMessage());
             }
         }
 

@@ -8,14 +8,23 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
+
 @Repository
 public interface SlotRepository extends JpaRepository<AvailabilitySlot, Long> {
 
     // PDF: findByProviderId()
     List<AvailabilitySlot> findByProviderId(Long providerId);
+    List<AvailabilitySlot> findByProviderIdAndDate(Long providerId, LocalDate date);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM AvailabilitySlot s WHERE s.providerId = :providerId AND s.date = :date")
+    void deleteByProviderIdAndDate(Long providerId, LocalDate date);
 
     // PDF: findByProviderIdAndDate()
-    List<AvailabilitySlot> findByProviderIdAndDate(Long providerId, LocalDate date);
+//    List<AvailabilitySlot> findByProviderIdAndDate(Long providerId, LocalDate date);
 
     // PDF: findAvailableByProviderAndDate() - only unbooked, unblocked slots visible to patients
     @Query("SELECT s FROM AvailabilitySlot s WHERE s.providerId = :providerId AND s.date = :date " +

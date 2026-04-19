@@ -76,6 +76,7 @@ public class ProviderServiceImpl implements ProviderService {
         if (request.getClinicAddress() != null) provider.setClinicAddress(request.getClinicAddress());
         if (request.getAddress() != null) provider.setAddress(request.getAddress());
         if (request.getContact() != null) provider.setContact(request.getContact());
+        if (request.getName() != null) provider.setFullName(request.getName());
 
         return mapToResponse(providerRepository.save(provider));
     }
@@ -88,6 +89,13 @@ public class ProviderServiceImpl implements ProviderService {
     }
 
     @Override
+    public ProviderResponse getProviderByEmail(String email) {
+        return providerRepository.findByEmail(email)
+                .map(this::mapToResponse)
+                .orElseThrow(() -> new ProviderNotFoundException("Provider not found with email: " + email));
+    }
+
+    @Override
     public List<ProviderResponse> searchProviders(String query) {
         return providerRepository.searchProviders(query).stream()
                 .map(this::mapToResponse)
@@ -97,7 +105,7 @@ public class ProviderServiceImpl implements ProviderService {
 
     @Override
     public List<ProviderResponse> getAllProviders() {
-        return providerRepository.findAll().stream()
+        return providerRepository.findAllApproved().stream()
                 .map(this::mapToResponse)
                 .filter(res -> res != null)
                 .collect(Collectors.toList());
@@ -105,7 +113,7 @@ public class ProviderServiceImpl implements ProviderService {
 
     @Override
     public List<ProviderResponse> getProvidersBySpecialization(String specialization) {
-        return providerRepository.findBySpecializationIgnoreCase(specialization).stream()
+        return providerRepository.findBySpecializationApproved(specialization).stream()
                 .map(this::mapToResponse)
                 .filter(res -> res != null)
                 .collect(Collectors.toList());
@@ -164,12 +172,14 @@ public class ProviderServiceImpl implements ProviderService {
         String name = (String) data.get("name");
         String email = (String) data.get("email");
         String speciality = (String) data.get("speciality");
+        String contact = (String) data.get("contact");
 
         // Use builder if available, or just create new
         Provider provider = Provider.builder()
                 .userId(userId)
                 .fullName(name)
                 .email(email)
+                .contact(contact)
                 .specialization(speciality)
                 .status(ProviderStatus.PENDING)
                 .isVerified(false)
@@ -177,5 +187,17 @@ public class ProviderServiceImpl implements ProviderService {
                 .build();
         
         providerRepository.save(provider);
+    }
+    @Override
+    public ProviderResponse reapply(Long providerId) {
+        Provider provider = providerRepository.findById(providerId)
+                .orElseThrow(() -> new ProviderNotFoundException("Provider not found with id: " + providerId));
+        
+        // Reset to PENDING and ensure isVerified is false
+        provider.setStatus(ProviderStatus.PENDING);
+        provider.setIsVerified(false);
+        
+        System.out.println("🔄 Entity Re-applying: " + provider.getEmail());
+        return mapToResponse(providerRepository.save(provider));
     }
 }
