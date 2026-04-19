@@ -33,7 +33,7 @@ public class RecordController {
 
     // 👤 Patient's own records
     @GetMapping("/patient/{patientId}")
-    @PreAuthorize("hasAnyRole('PATIENT', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PATIENT', 'DOCTOR', 'ADMIN')")
     public ResponseEntity<List<RecordResponse>> getByPatient(@PathVariable Long patientId) {
         return ResponseEntity.ok(recordService.getRecordsByPatient(patientId));
     }

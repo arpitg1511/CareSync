@@ -41,7 +41,7 @@ public class ProviderServiceImpl implements ProviderService {
                     .address(p.getAddress())
                     .contact(p.getContact())
                     .avgRating(p.getAvgRating() != null ? p.getAvgRating() : 0.0)
-                    .isVerified(p.getIsVerified() != null ? p.getIsVerified() : false)
+                    .isVerified(p.getIsVerified() != null ? p.getIsVerified() : (p.getStatus() == ProviderStatus.APPROVED))
                     .isAvailable(p.getIsAvailable() != null ? p.getIsAvailable() : true)
                     .status(p.getStatus() != null ? p.getStatus().name() : "PENDING")
                     .createdAt(p.getCreatedAt())
@@ -174,17 +174,21 @@ public class ProviderServiceImpl implements ProviderService {
         String speciality = (String) data.get("speciality");
         String contact = (String) data.get("contact");
 
-        // Use builder if available, or just create new
-        Provider provider = Provider.builder()
-                .userId(userId)
-                .fullName(name)
-                .email(email)
-                .contact(contact)
-                .specialization(speciality)
-                .status(ProviderStatus.PENDING)
-                .isVerified(false)
-                .isAvailable(true)
-                .build();
+        Provider provider = providerRepository.findByUserId(userId)
+                .orElse(Provider.builder()
+                        .userId(userId)
+                        .status(ProviderStatus.PENDING)
+                        .isVerified(false)
+                        .isAvailable(true)
+                        .avgRating(0.0)
+                        .experienceYears(0)
+                        .experienceMonths(0)
+                        .build());
+        
+        provider.setFullName(name);
+        provider.setEmail(email);
+        provider.setContact(contact);
+        provider.setSpecialization(speciality);
         
         providerRepository.save(provider);
     }

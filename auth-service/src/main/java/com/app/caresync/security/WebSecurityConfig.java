@@ -65,7 +65,9 @@ public class WebSecurityConfig {
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 // 4. CHANGE STATELESS TO IF_REQUIRED
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/signin", "/api/auth/signup", "/api/auth/internal/**").permitAll()
+                        .requestMatchers("/api/auth/profile", "/api/auth/password", "/api/auth/deactivate").authenticated()
                         .requestMatchers("/api/test/**").permitAll()
                         .anyRequest().authenticated())
                 .oauth2Login(oauth2 -> oauth2
