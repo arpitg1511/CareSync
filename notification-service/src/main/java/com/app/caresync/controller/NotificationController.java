@@ -33,10 +33,10 @@ public class NotificationController {
     }
 
     // PDF: getUnreadCount (for badge)
-    @GetMapping("/recipient/{recipientId}/count")
+    @GetMapping("/recipient/{recipientId}/unread/count")
     @PreAuthorize("hasAnyRole('PATIENT', 'DOCTOR', 'ADMIN')")
     public ResponseEntity<Map<String, Long>> getUnreadCount(@PathVariable Long recipientId) {
-        return ResponseEntity.ok(Map.of("unreadCount", notificationService.getUnreadCount(recipientId)));
+        return ResponseEntity.ok(Map.of("count", notificationService.getUnreadCount(recipientId)));
     }
 
     // PDF: markAsRead

@@ -11,7 +11,7 @@ public class Notification {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long notificationId;
 
-    @Column(nullable = false)
+    @Column(name = "recipient_id", nullable = false)
     private Long recipientId;
 
     @Column(nullable = false)
@@ -37,6 +37,7 @@ public class Notification {
     private Long relatedId;
     private String relatedType; // APPOINTMENT, PAYMENT, REVIEW, RECORD
 
+    @Column(name = "is_read")
     @Builder.Default
     private Boolean isRead = false;
 

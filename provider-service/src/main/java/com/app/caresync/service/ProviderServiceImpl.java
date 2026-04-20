@@ -78,6 +78,12 @@ public class ProviderServiceImpl implements ProviderService {
         if (request.getContact() != null) provider.setContact(request.getContact());
         if (request.getName() != null) provider.setFullName(request.getName());
 
+        // FORCE re-evaluation if profile is updated from REJECTED state
+        if (provider.getStatus() == ProviderStatus.REJECTED) {
+            provider.setStatus(ProviderStatus.PENDING);
+            provider.setIsVerified(false);
+        }
+
         return mapToResponse(providerRepository.save(provider));
     }
 
