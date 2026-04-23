@@ -28,7 +28,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
                 String role = jwtUtils.getRoleFromJwtToken(jwt);
                 
-                // 🛡️ Null-Safe & Prefix-Smart Authority Extraction
+                // Null-Safe & Prefix-Smart Authority Extraction
                 String finalRole = (role != null) 
                     ? (role.toUpperCase().startsWith("ROLE_") ? role.toUpperCase() : "ROLE_" + role.toUpperCase())
                     : "ROLE_PATIENT"; // Default fallback

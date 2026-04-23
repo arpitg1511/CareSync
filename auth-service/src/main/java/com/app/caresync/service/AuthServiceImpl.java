@@ -17,6 +17,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.*;
+
 @Service
 public class AuthServiceImpl implements AuthService {
 
@@ -76,11 +78,11 @@ public class AuthServiceImpl implements AuthService {
 
         User savedUser = userRepository.save(user);
 
-        // 🔗 If the user is a Doctor, notify the provider-service
+        // If the user is a Doctor, notify the provider-service
         if (role == UserRole.DOCTOR) {
             try {
-                System.out.println("🔄 Syncing Doctor Profile to Provider-Service for: " + savedUser.getEmail());
-                java.util.Map<String, Object> providerData = new java.util.HashMap<>();
+                System.out.println("Syncing Doctor Profile to Provider-Service for: " + savedUser.getEmail());
+                Map<String, Object> providerData = new java.util.HashMap<>();
                 providerData.put("userId", savedUser.getUserId());
                 providerData.put("name", savedUser.getFullName());
                 providerData.put("email", savedUser.getEmail());
@@ -94,22 +96,23 @@ public class AuthServiceImpl implements AuthService {
                 
                 providerClient.createProviderProfile(providerData);
             } catch (Exception e) {
-                System.err.println("❌ DOCTOR SYNC FAILED: " + e.getMessage());
+                System.err.println("DOCTOR SYNC FAILED: " + e.getMessage());
             }
         } 
         
-        // 🔗 If the user is a Patient, notify the patient-service
+        // If the user is a Patient, notify the patient-service
         if (role == UserRole.PATIENT) {
             try {
-                System.out.println("🔄 Syncing Patient Profile to Patient-Service for: " + savedUser.getEmail());
-                java.util.Map<String, Object> patientData = new java.util.HashMap<>();
+                System.out.println("Syncing Patient Profile to Patient-Service for: " + savedUser.getEmail());
+                Map<String, Object> patientData = new java.util.HashMap<>();
                 patientData.put("userId", savedUser.getUserId());
                 patientData.put("name", savedUser.getFullName());
                 patientData.put("email", savedUser.getEmail());
+                patientData.put("contact", savedUser.getPhone());
                 
                 patientClient.createPatientProfile(patientData);
             } catch (Exception e) {
-                System.err.println("❌ PATIENT SYNC FAILED: " + e.getMessage());
+                System.err.println("PATIENT SYNC FAILED: " + e.getMessage());
             }
         }
 

@@ -81,7 +81,7 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public void createProfileFromUser(java.util.Map<String, Object> data) {
-        System.out.println("📥 RECEIVED Sync Request for Patient Profile: " + data.get("email"));
+        System.out.println("RECEIVED Sync Request for Patient Profile: " + data.get("email"));
         Long userId = Long.valueOf(data.get("userId").toString());
         String name = (String) data.get("name");
         String email = (String) data.get("email");

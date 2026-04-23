@@ -15,9 +15,9 @@ public class AuthServiceApplication {
 	//@org.springframework.context.annotation.Bean
 //	org.springframework.boot.CommandLineRunner initAdmin(com.app.caresync.repository.UserRepository repository) {
 //		return args -> {
-//			String specificEmail = "manish@gmail.com"; // REPLACE THIS WITH YOUR EMAIL
+//			String specificEmail = "omar@gmail.com"; // REPLACE THIS WITH YOUR EMAIL
 //			repository.findByEmail(specificEmail).ifPresent(user -> {
-//				user.setRole(com.app.caresync.model.UserRole.DOCTOR);
+//				user.setRole(com.app.caresync.model.UserRole.ADMIN);
 //				repository.save(user);
 //				System.out.println("ROLE ELEVATED: " + specificEmail + " is now an ADMIN!");
 //			});

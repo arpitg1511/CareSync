@@ -19,7 +19,7 @@
 	</properties>
 
 	<dependencies>
-		<!-- 🚀 CORE GATEWAY (Uses WebFlux/Netty) -->
+		<!-- CORE GATEWAY (Uses WebFlux/Netty) -->
 		<!-- DO NOT ADD spring-boot-starter-web HERE -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
