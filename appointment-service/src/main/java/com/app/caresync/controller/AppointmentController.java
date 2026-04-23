@@ -4,6 +4,8 @@ import com.app.caresync.dto.AppointmentRequest;
 import com.app.caresync.dto.AppointmentResponse;
 import com.app.caresync.model.AppointmentStatus;
 import com.app.caresync.service.AppointmentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,6 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/appointments")
+@Tag(name = "Appointment Controller", description = "Endpoints for managing medical appointments")
 public class AppointmentController {
 
     @Autowired
@@ -22,6 +25,7 @@ public class AppointmentController {
     // PDF: POST book
     @PostMapping("/book")
     @PreAuthorize("hasRole('PATIENT')")
+    @Operation(summary = "Book a new appointment", description = "Allows a patient to book a slot for a provider")
     public ResponseEntity<AppointmentResponse> book(@RequestBody AppointmentRequest request) {
         return ResponseEntity.ok(appointmentService.bookAppointment(request));
     }

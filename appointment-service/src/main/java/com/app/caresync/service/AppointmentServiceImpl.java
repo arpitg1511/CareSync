@@ -26,6 +26,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Autowired private PatientClient patientClient;
     @Autowired private ProviderClient providerClient;
     @Autowired private RestTemplate restTemplate;
+    @Autowired private MessageProducer messageProducer;
 
     @Value("${schedule.service.url}")
     private String scheduleServiceUrl;
@@ -40,6 +41,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         try {
             patient = patientClient.getPatientByEmail(email);
         } catch (Exception e) {
+            e.printStackTrace(); // 🔍 ADDED FOR DEBUGGING
             throw new RuntimeException("Operational Error: No Patient Profile associated with this account. Only verified patients can initialize booking vectors.");
         }
 
@@ -69,15 +71,26 @@ public class AppointmentServiceImpl implements AppointmentService {
             } catch (Exception e) { /* log and ignore */ }
         }
 
-        // Send confirmation
+        // 🚀 RabbitMQ: Send confirmation asynchronously
         try {
-            restTemplate.postForEntity(
-                notificationServiceUrl + "/api/notifications/internal/booking-confirmation" +
-                "?patientId=" + saved.getPatientId() +
-                "&providerId=" + saved.getProviderId() +
-                "&appointmentId=" + saved.getAppointmentId(),
-                null, Void.class);
-        } catch (Exception e) { /* log and ignore */ }
+            com.app.caresync.dto.NotificationEvent event = com.app.caresync.dto.NotificationEvent.builder()
+                    .recipientId(saved.getPatientId()).recipientRole("PATIENT")
+                    .title("Appointment Confirmed")
+                    .message("Your appointment #" + saved.getAppointmentId() + " has been confirmed.")
+                    .type("BOOKING").channel("APP")
+                    .relatedId(saved.getAppointmentId()).relatedType("APPOINTMENT")
+                    .build();
+            messageProducer.sendNotification(event);
+
+            com.app.caresync.dto.NotificationEvent doctorEvent = com.app.caresync.dto.NotificationEvent.builder()
+                    .recipientId(saved.getProviderId()).recipientRole("DOCTOR")
+                    .title("New Appointment Booked")
+                    .message("New appointment #" + saved.getAppointmentId() + " has been booked.")
+                    .type("BOOKING").channel("APP")
+                    .relatedId(saved.getAppointmentId()).relatedType("APPOINTMENT")
+                    .build();
+            messageProducer.sendNotification(doctorEvent);
+        } catch (Exception e) { /* log and ignore RabbitMQ errors */ }
 
         return mapToResponse(saved);
     }
@@ -137,15 +150,26 @@ public class AppointmentServiceImpl implements AppointmentService {
             } catch (Exception e) { /* log and ignore */ }
         }
 
-        // Send notification
+        // RabbitMQ: Send cancellation alert asynchronously
         try {
-            restTemplate.postForEntity(
-                notificationServiceUrl + "/api/notifications/internal/cancellation-alert" +
-                "?patientId=" + saved.getPatientId() +
-                "&providerId=" + saved.getProviderId() +
-                "&appointmentId=" + saved.getAppointmentId(),
-                null, Void.class);
-        } catch (Exception e) { /* log and ignore */ }
+            com.app.caresync.dto.NotificationEvent pEvent = com.app.caresync.dto.NotificationEvent.builder()
+                    .recipientId(saved.getPatientId()).recipientRole("PATIENT")
+                    .title("Appointment Cancelled")
+                    .message("Appointment #" + saved.getAppointmentId() + " cancelled. Refund will be processed if eligible.")
+                    .type("CANCELLATION").channel("APP")
+                    .relatedId(saved.getAppointmentId()).relatedType("APPOINTMENT")
+                    .build();
+            messageProducer.sendNotification(pEvent);
+
+            com.app.caresync.dto.NotificationEvent dEvent = com.app.caresync.dto.NotificationEvent.builder()
+                    .recipientId(saved.getProviderId()).recipientRole("DOCTOR")
+                    .title("Appointment Cancelled")
+                    .message("Appointment #" + saved.getAppointmentId() + " was cancelled by the patient.")
+                    .type("CANCELLATION").channel("APP")
+                    .relatedId(saved.getAppointmentId()).relatedType("APPOINTMENT")
+                    .build();
+            messageProducer.sendNotification(dEvent);
+        } catch (Exception e) { /* log and ignore RabbitMQ errors */ }
 
         return mapToResponse(saved);
     }

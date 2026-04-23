@@ -16,7 +16,8 @@ public class WebSecurityConfig {
         http.csrf(c -> c.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(a ->
-                a.requestMatchers("/api/reviews/provider/**").permitAll()
+                a.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                 .requestMatchers("/api/reviews/provider/**").permitAll()
                  .anyRequest().authenticated()
             );
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

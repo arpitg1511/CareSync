@@ -23,7 +23,8 @@ public class WebSecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth ->
-                auth.requestMatchers("/", "/error").permitAll()
+                auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                    .requestMatchers("/", "/error").permitAll()
                     .requestMatchers("/api/slots/internal/**", "/api/slots/available", "/api/slots/upcoming/**").permitAll()
                     .anyRequest().authenticated()
             );
