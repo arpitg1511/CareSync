@@ -14,6 +14,6 @@ public class MessageProducer {
 
     public void sendNotification(NotificationEvent event) {
         template.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.ROUTING_KEY, event);
-        System.out.println("🚀 [RabbitMQ] Sent Notification Event for Patient ID: " + event.getRecipientId());
+        System.out.println("[RabbitMQ] Sent Notification Event for Patient ID: " + event.getRecipientId());
     }
 }

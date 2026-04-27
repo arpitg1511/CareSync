@@ -29,8 +29,7 @@ public class PatientControllerTest {
     @MockBean
     private PatientService patientService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+
 
     @Test
     @WithMockUser(username = "john@example.com")

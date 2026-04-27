@@ -17,7 +17,7 @@ public class NotificationConsumer {
 
     @RabbitListener(queues = RabbitMQConfig.QUEUE)
     public void consumeMessage(NotificationEvent event) {
-        System.out.println("📥 [RabbitMQ] Received Notification for Recipient ID: " + event.getRecipientId());
+        System.out.println("[RabbitMQ] Received Notification for Recipient ID: " + event.getRecipientId());
         
         NotificationRequest request = new NotificationRequest();
         request.setRecipientId(event.getRecipientId());
