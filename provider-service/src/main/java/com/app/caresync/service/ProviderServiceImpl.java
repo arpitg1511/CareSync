@@ -9,6 +9,8 @@ import com.app.caresync.model.Provider;
 import com.app.caresync.model.ProviderStatus;
 import com.app.caresync.repository.ProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -54,6 +56,7 @@ public class ProviderServiceImpl implements ProviderService {
     }
 
     @Override
+    @CacheEvict(value = "providers", allEntries = true)
     public ProviderResponse saveProvider(String email, ProviderRequest request) {
         UserDTO user = authClient.getUserByEmail(email);
 
@@ -88,6 +91,7 @@ public class ProviderServiceImpl implements ProviderService {
     }
 
     @Override
+    @Cacheable(value = "providers", key = "#providerId")
     public ProviderResponse getProviderById(Long providerId) {
         return providerRepository.findById(providerId)
                 .map(this::mapToResponse)
@@ -95,6 +99,7 @@ public class ProviderServiceImpl implements ProviderService {
     }
 
     @Override
+    @Cacheable(value = "providers", key = "'email:' + #email")
     public ProviderResponse getProviderByEmail(String email) {
         return providerRepository.findByEmail(email)
                 .map(this::mapToResponse)
@@ -110,6 +115,7 @@ public class ProviderServiceImpl implements ProviderService {
     }
 
     @Override
+    @Cacheable(value = "providers", key = "'all_approved'")
     public List<ProviderResponse> getAllProviders() {
         return providerRepository.findAllApproved().stream()
                 .map(this::mapToResponse)
@@ -118,6 +124,7 @@ public class ProviderServiceImpl implements ProviderService {
     }
 
     @Override
+    @Cacheable(value = "providers", key = "'spec:' + #specialization")
     public List<ProviderResponse> getProvidersBySpecialization(String specialization) {
         return providerRepository.findBySpecializationApproved(specialization).stream()
                 .map(this::mapToResponse)
@@ -126,6 +133,7 @@ public class ProviderServiceImpl implements ProviderService {
     }
 
     @Override
+    @CacheEvict(value = "providers", allEntries = true)
     public ProviderResponse verifyProvider(Long providerId, ProviderStatus status) {
         Provider provider = providerRepository.findById(providerId)
                 .orElseThrow(() -> new ProviderNotFoundException("Provider not found with id: " + providerId));
@@ -135,6 +143,7 @@ public class ProviderServiceImpl implements ProviderService {
     }
 
     @Override
+    @CacheEvict(value = "providers", allEntries = true)
     public ProviderResponse setAvailability(Long providerId, Boolean isAvailable) {
         Provider provider = providerRepository.findById(providerId)
                 .orElseThrow(() -> new ProviderNotFoundException("Provider not found with id: " + providerId));
@@ -159,6 +168,7 @@ public class ProviderServiceImpl implements ProviderService {
     }
 
     @Override
+    @CacheEvict(value = "providers", allEntries = true)
     public void deleteProvider(Long providerId) {
         if (!providerRepository.existsById(providerId)) {
             throw new ProviderNotFoundException("Provider not found with id: " + providerId);

@@ -33,6 +33,10 @@ spring:
             - Path=/api/providers/**, /api/admin/**
           filters:
             - RewritePath=/api/admin/(?<segment>.*), /api/providers/admin/$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: providerServiceCB
+                fallbackUri: forward:/fallback/providers
 
         - id: provider-docs
           uri: ${PROVIDER_SERVICE_URL:http://localhost:8082}
@@ -146,3 +150,24 @@ springdoc:
         url: /record-docs/v3/api-docs
       - name: Notification Service
         url: /notification-docs/v3/api-docs
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      providerServiceCB:
+        slidingWindowSize: 10
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowType: TIME_BASED
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+  timelimiter:
+    instances:
+      providerServiceCB:
+        timeoutDuration: 3s

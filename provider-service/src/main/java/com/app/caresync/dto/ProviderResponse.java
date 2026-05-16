@@ -1,10 +1,12 @@
 package com.app.caresync.dto;
 
 import lombok.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
-public class ProviderResponse {
+public class ProviderResponse implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Long providerId;
     private Long userId;
     private String fullName;

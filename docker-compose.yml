@@ -13,6 +13,14 @@ services:
     networks:
       - caresync-network
 
+  redis:
+    image: redis:7-alpine
+    container_name: caresync-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - caresync-network
+
 networks:
   caresync-network:
     driver: bridge
